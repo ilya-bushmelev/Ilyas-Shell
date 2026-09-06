@@ -23,7 +23,7 @@
   - `sudo` - ты должен это знать (КОМАНДА УДАЛЕНА).  
 
 - **Сайт про Ilya's:Shell**
-  [Ссылка на сайт](https://ilya-bushmelev.guthub.io/Ilyas-Shell)
+  [Ссылка на сайт](https://ilya-bushmelev.github.io/Ilyas-Shell)
 
 - **Пользовательские команды**:  
   Добавь свои функции в `configShell.py` — и они появятся в оболочке. 
