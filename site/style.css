@@ -17,6 +17,10 @@
     color: #fff;
     font-family: JetBrains Mono, system-ui, sans-serif;
 }
+::selection{
+    background-color: #0a0;
+    color: white;
+}
 html{
     width: 100%;
     min-height: 100%;
