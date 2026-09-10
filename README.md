@@ -190,13 +190,14 @@ ilyascmd # для ilya's:cmd_
 
 - Дипсик (за объяснения)
 
-- Claude
+- nickgotswag
 
 - Arch Linux
 
 ## 🔗 Ссылки
 
 [GitHub репозиторий](https://github.com/ilya-bushmelev/Ilyas-Shell)
+[Сайт-визитка оболочки](https://ilya-bushmelev.github.io/Ilyas-Shell/)
 
 ---
 
