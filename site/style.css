@@ -86,6 +86,8 @@ button, .button-like-a{
     box-shadow: 5px 5px 2px #111;
     transition: all 0.08s ease;
     cursor: pointer;
+
+    -webkit-tap-highlight-color: transparent;
 }
 button:hover, .button-like-a:hover{
     background: #4c4c4c;
@@ -110,7 +112,7 @@ button:active, .button-like-a:active{
 }
 footer{
     margin-top: auto;
-
+    user-select: none;
 }
 .footer-hr{
     height: 3px;
