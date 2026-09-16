@@ -45,6 +45,7 @@ PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
 DEAD_LIST = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
 KILL_BLACK_LIST = []
+EVAL_ENABLED = False
 
 # -- Пользовательские команды --
 class USER_COMMANDS:

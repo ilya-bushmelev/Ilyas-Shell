@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 # ^^^ шебанг ^^^
 
-                ### ---------------------- ###  
-                ### --<( Ilya's:Shell )>-- ### 
-                ### ---------------------- ###
-
+#           / - IlyasShell.py ------------- [-][0][X] \
+#           |   ### ---------------------------- ###  |
+#           |   ### -----<( Ilya's:Shell )>----- ###  |
+#           |   ### -------- ( v2.0 ) ---------- ###  |
+#           |   ### ---------------------------- ###  |
+#           \ --------------------------------------- /
 #   Приветствую в коде оболочки! Код полностью читаемый и понятный.
 #   Задумка была чтобы быть улучшенной версией ilya's:cmd_, которая работает через модули.
 #   Кстати, посмотри configShell.py там находится конфиг оболочки! 
@@ -67,6 +69,7 @@ PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
 DEAD_LIST = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
 KILL_BLACK_LIST = []
+EVAL_ENABLED = False
 
 # -- Пользовательские команды --
 class USER_COMMANDS:
@@ -95,11 +98,30 @@ except ModuleNotFoundError:
             import configShell
         except Exception:
             raise SystemExit("Произошла повторная ошибка. Проверьте конфиг")
+    else:
+        print("Без конфига оболочка не может работать.")
 try:
     import calc1
     import pifagor
 except ModuleNotFoundError:
     pass
+
+### -- Низкоуровневое логирование --
+DEBUG_MODE = False
+if len(sys.argv) > 1 and sys.argv[1] == 'debug':
+    DEBUG_MODE = True
+def log(msg, lvl='INFO'):
+    if not DEBUG_MODE:
+        return
+    else:
+        colors = {
+            'INFO': col.g,
+            'WARNING': col.y,
+            'ERROR': col.r,
+            'CRITICAL': col.r + stl.bd,
+        }
+        color = colors.get(lvl, col.w)
+        print(f'{color}│ [{lvl}]{rs.all} {msg}')
 
 ### -- Переменные --
 __version__ = 'v1.2'
@@ -111,26 +133,34 @@ rs = configShell.rs
 prompt = configShell.PROMPT
 dead_list = configShell.DEAD_LIST
 dont_dare = configShell.KILL_BLACK_LIST
+log("loaded many things from config")
 
 USER = os.getlogin()
 
 ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
-dont_dare.extend(['чижик', 'chizhik', 'илья', 'ilya', "пыжуля", 'pyzhulya' "чыжык", USER])
+log("loaded dont_dare")
+dont_dare.extend(['чижик', 'chizhik', 'илья', 'ilya', "пыжуля", 'pyzhulya', "чыжык", USER])
 history_file = os.path.expanduser('~/.history_file')
 
+log('trying to open history file...')
 try:
     readline.read_history_file(history_file)
+    log('succesfully readed history file')
 except FileNotFoundError:
+    log("history file doesn't exist, creating a new one", 'WARNING')
     open(history_file, 'w').close()
     readline.read_history_file(history_file)
+    log('succesfully readed history file')
 
 INTERACTIVE = False
 ### -- ??? --
 if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     at = 0
+    log('YOU HAD IT COMING', 'CRITICAL')
     while at < 10:
         try:
+            
             for ayli in range(3):
                 print('.', end='', flush=True)
                 time.sleep(1)
@@ -155,8 +185,11 @@ def shelp(): # к сожалению help() нельзя использоват�
             'calc/calculator                    - запуск скрипта calc1.py (через вызов функции, напрямую невозможно)\n',
             'rng/random/randomizer <min> <max>  - вывести рандомное число в заданом диапазоне\n',
             'pif/pifagor                        - запуск скрипта pifagor.py (через вызов функции, напрямую невозможно)\n',
+            'binary [-d/-e] <число>             - перевод число в двоичную систему и обратно\n',
             'guess <максимальное число>         - игра в угадай число\n',
             'echo <текст>                       - вывести текст\n',
+            'hex [-d/-e] <число>                - перевод в шестнадцатеричную систему и наоборот\n',
+            'eval <команда>                     - опасная команда для вызова eval()'
         )
     elif INTERACTIVE == False:
         print(f"{ilya} Вот тебе список:\n",
@@ -177,12 +210,14 @@ class KillAttemptError(Exception):
     pass
 def kill(target='Null'):
     if target == 'Null' or not target:
+        log('no args were given', "WARNING")
         target = input(f'{ilya} Кого хочешь {col.r}{stl.bd}убить? {rs.all}{col.y}')
     else:
         target = ' '.join(target)
     target_ls = target.lower().strip()
     global dead_list
     if any(bad_name in target_ls for bad_name in dont_dare):
+        log("DO NOT", "CRITICAL")
         raise KillAttemptError(f"{col.r}{stl.bd}{random.choice([
             'don\'t dare',
             'не смей',
@@ -200,15 +235,18 @@ def kill(target='Null'):
         confirm = input(f'{ilya}Ты уверен? [y/N] ').lower().strip()
         if confirm in ['y', 'yes', 'д', 'да']:
             dead_list.append(target)
+            log(f'added {target} to dead_list')
             print(f'{ilya}{target} УБИТ!')
         else:
             print(f'{ilya}{col.v}{target} остаётся в живых!{rs.all}')
     else:
+        log("target already in dead_list", "WARNING")
         print(f'{ilya} как я смогу убить мёртвого?')
 
 def revive(target='Null'):
     global dead_list
     if target == 'Null' or not target:
+        log("no args were given", "WARNING")
         target = input(f'{col.r}{stl.bd}???: {col.y}target to revive: {stl.bd}')
     else:
         target = ' '.join(target)
@@ -242,6 +280,7 @@ def version():
 def whoami():
     # омг посхалко
     if USER == f'ilya':
+        log("you discovered an easter egg!")
         print(f"{ilya} Тебя зовут.. {col.w}")
         time.sleep(2)
         print(f"{ilya} Стоп чё?. {col.w}")
@@ -262,6 +301,7 @@ def whoami():
 
 def guess(arg='Null'):
     if arg == 'Null' or not arg:
+        log('no args were given', "WARNING")
         max_num = int(input(f'{ilya} Перед началом, напиши число лимита: '))
     else:
         max_num = int(arg[0])
@@ -333,6 +373,22 @@ def binary_code(arg):
         print(f'{ilya} error')
     except IndexError:
         print(f'{ilya} error')
+def hex_code(arg):
+    try:
+        flag = arg[0]
+        num = int(arg[1])
+        if flag == '-e':
+            result = hex(num)
+        elif flag == '-d':
+            result = int(str(num), 16)
+        print(f'{ilya} Результат: {result}')
+    except (ValueError, IndexError):
+        print(f'{ilya} error')
+def sheval(arg):
+    if configShell.EVAL_ENABLED == True:
+        eval(' '.join(arg))
+    else:
+        print(f'{stl.bd + col.r}Данное действие запрещено.{rs.all}')
 ### -- Словарики команд --
 COMMANDSWARGS = {
     'kill':kill,
@@ -344,7 +400,9 @@ COMMANDSWARGS = {
     'random':rng,
     'randomizer':rng,
     'binary':binary_code,
-    'guess':guess
+    'guess':guess,
+    'hex':hex_code,
+    'eval':sheval
 }
 COMMANDS = {
     'help':shelp,
@@ -363,8 +421,6 @@ COMMANDS = {
 def StartShell(mode='normal'):
     global INTERACTIVE
     INTERACTIVE = True
-    if mode == 'debug':
-        debug = True
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
@@ -374,39 +430,43 @@ def StartShell(mode='normal'):
         print(f'{stl.bd}{col.g}Включенны пользовательские команды.{rs.all}')
     while True:
         try:
-            if debug: print('waiting for user input')
+            log('waiting for user input')
             inp = input(f'{prompt} > ').split()
             cmd = inp[0]
             arg = inp[1:]
+            log("input completed")
         except KeyboardInterrupt:
-            if debug: print('exit because interupt')
+            log('exit because interupt')
             INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except EOFError:
-            if debug: print('exit because eof')
+            log('exit because eof')
             INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except IndexError:
-            if debug: print('IndexError')
+            log('IndexError', 'WARNING')
             continue
-        if debug: print('write history file')
         readline.write_history_file(history_file)
+        log('write history file')
         try:
-            if cmd in COMMANDSWARGS:    
+            if cmd in COMMANDSWARGS:   
+                log(f"executing {cmd} with args {arg}") 
                 COMMANDSWARGS[cmd](arg)
             elif cmd in COMMANDS:
+                log(f"executing {cmd}")
                 COMMANDS[cmd]()
             elif cmd in ['exit', 'break', 'quit']:
                 INTERACTIVE = False
-                # raise SystemExit(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
+                log("exiting throught exit command")
                 print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
                 break
             else:
                 print(configShell.COMMAND_NOT_FOUND)
         except Exception as e:
-            if debug:
+            if DEBUG_MODE:
+                log("an exception has ocurred", "ERROR")
                 traceback.print_exc()
             else:
                 EType = type(e).__name__
@@ -424,5 +484,5 @@ def StartShell(mode='normal'):
                 print(f'{stl.bd}{col.v if EType != "KillAttemptError" else col.r}{EType}{rs.all}: {e}{rs.all}')
 # -- Запуск --
 if __name__ == '__main__': # Если файл запущен напрямую, то запускается StartShell() и оболочка начинает работать
-    mode_for_load = sys.argv[1] if len(sys.argv) else 'normal'
-    StartShell(mode_for_load)
+    log("starting StartShell()")
+    StartShell()
