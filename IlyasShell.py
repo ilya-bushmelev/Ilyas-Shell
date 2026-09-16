@@ -17,10 +17,84 @@ import time
 import readline
 import traceback
 import sys
+
+# -- Импорт конфига --
+CFG_TEMPLATE = r'''
+class col:
+    r = '\033[91m'  # красный
+    g = '\033[92m'  # зелёный
+    y = '\033[93m'  # жёлтый
+    b = '\033[94m'  # синий
+    c = '\033[96m'  # голубой
+    v = '\033[95m'  # фиолетовый
+    o = '\033[38;5;214m'  # оранжевый
+    w = '\033[37m'  # белый
+    gray = '\033[90m'  # серый
+    black = '\033[30m'
+
+
+class bg:
+    r = '\033[101m'
+    g = '\033[102m'
+    y = '\033[103m'
+    b = '\033[104m'
+    c = '\033[106m'
+    v = '\033[105m'
+    o = '\033[48;5;214m'
+    w = '\033[107m'
+    gray = '\033[100m'
+    black = '\033[40m'
+
+
+class stl:
+    bd = '\033[1m'
+    dim = '\033[2m'
+    italic = '\033[3m'
+    underl = '\033[4m'
+    blink = '\033[5m'
+    reverse = '\033[7m'
+    hidden = '\033[8m'
+
+
+class rs:
+    all = '\033[0m'
+    fg = '\033[39m'
+    bg = '\033[49m'
+    stl = '\033[22m'
+
+
+PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
+DEAD_LIST = []
+COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
+KILL_BLACK_LIST = []
+
+# -- Пользовательские команды --
+class USER_COMMANDS:
+    enabled = False
+
+    # -- Команды --
+    def chizhik_says(arg):
+        text = ' '.join(arg)
+        print(f"Чижик говорит: {text}")
+    # -- Ссылки на команды --
+    list_with_args = {
+        'chizhik_says': chizhik_says
+    }; list_ = {
+        # пока здесь пусто ;(
+    }
+'''
+
 try:
     import configShell
 except ModuleNotFoundError:
-    raise SystemError('Файл конфига не найден. Работа оболочки невозможна.')
+    confirm_create_new_cfg = input('Файл конфига не найден. Создать новый? [Д/Y] ')
+    if confirm_create_new_cfg.lower() in ['y','д','yes','да']:
+        with open('configShell.py', 'w', encoding='utf-8') as f:
+            f.write(CFG_TEMPLATE)
+        try:
+            import configShell
+        except Exception:
+            raise SystemExit("Произошла повторная ошибка. Проверьте конфиг")
 try:
     import calc1
     import pifagor
@@ -29,6 +103,7 @@ except ModuleNotFoundError:
 
 ### -- Переменные --
 __version__ = 'v1.2'
+
 col = configShell.col
 bg = configShell.bg
 stl = configShell.stl
@@ -43,6 +118,7 @@ ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
 dont_dare.extend(['чижик', 'chizhik', 'илья', 'ilya', "пыжуля", 'pyzhulya' "чыжык", USER])
 history_file = os.path.expanduser('~/.history_file')
+
 try:
     readline.read_history_file(history_file)
 except FileNotFoundError:
@@ -284,9 +360,11 @@ COMMANDS = {
 }
 
 #  -- Основной цикл --
-def StartShell():
+def StartShell(mode='normal'):
     global INTERACTIVE
     INTERACTIVE = True
+    if mode == 'debug':
+        debug = True
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
@@ -296,21 +374,24 @@ def StartShell():
         print(f'{stl.bd}{col.g}Включенны пользовательские команды.{rs.all}')
     while True:
         try:
+            if debug: print('waiting for user input')
             inp = input(f'{prompt} > ').split()
             cmd = inp[0]
             arg = inp[1:]
         except KeyboardInterrupt:
+            if debug: print('exit because interupt')
             INTERACTIVE = False
-            # raise SystemExit(f'\n{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except EOFError:
+            if debug: print('exit because eof')
             INTERACTIVE = False
-            # raise SystemExit(f'\n{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except IndexError:
+            if debug: print('IndexError')
             continue
+        if debug: print('write history file')
         readline.write_history_file(history_file)
         try:
             if cmd in COMMANDSWARGS:    
@@ -325,19 +406,23 @@ def StartShell():
             else:
                 print(configShell.COMMAND_NOT_FOUND)
         except Exception as e:
-            EType = type(e).__name__
-            print(f'{col.y}{stl.bd}{random.choice([
-                f'Опа! Ошибка...',
-                f'Чё? Опять?',
-                f'Ломай! Ломай! Мы же миллионеры!',
-                f'о нет ошыбка',
-                f'404 Error: Message Not Found',
-                f'программисты перед сном вместо овец считают ошибки',
-                f'-1 нервная клетка',
-                f'Удачи разобраться',
-                f'(илья снова не придумал сообщение)'
-            ])}{rs.all}')
-            print(f'{stl.bd}{col.v if EType != "KillAttemptError" else col.r}{EType}{rs.all}: {e}{rs.all}')
+            if debug:
+                traceback.print_exc()
+            else:
+                EType = type(e).__name__
+                print(f'{col.y}{stl.bd}{random.choice([
+                    f'Опа! Ошибка...',
+                    f'Чё? Опять?',
+                    f'Ломай! Ломай! Мы же миллионеры!',
+                    f'о нет ошыбка',
+                    f'404 Error: Message Not Found',
+                    f'программисты перед сном вместо овец считают ошибки',
+                    f'-1 нервная клетка',
+                    f'Удачи разобраться',
+                    f'(илья снова не придумал сообщение)'
+                ])}{rs.all}')
+                print(f'{stl.bd}{col.v if EType != "KillAttemptError" else col.r}{EType}{rs.all}: {e}{rs.all}')
 # -- Запуск --
 if __name__ == '__main__': # Если файл запущен напрямую, то запускается StartShell() и оболочка начинает работать
-    StartShell()
+    mode_for_load = sys.argv[1] if len(sys.argv) else 'normal'
+    StartShell(mode_for_load)
