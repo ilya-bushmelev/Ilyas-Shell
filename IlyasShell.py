@@ -133,7 +133,7 @@ rs = configShell.rs
 prompt = configShell.PROMPT
 dead_list = configShell.DEAD_LIST
 dont_dare = configShell.KILL_BLACK_LIST
-log("loaded many things from config")
+log("loaded many things from config (styles, prompt, dead_list, dont_dare)")
 
 USER = os.getlogin()
 
@@ -157,6 +157,7 @@ INTERACTIVE = False
 ### -- ??? --
 if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     at = 0
+    log("something gone wrong", "CRITICAL")
     log('YOU HAD IT COMING', 'CRITICAL')
     while at < 10:
         try:
