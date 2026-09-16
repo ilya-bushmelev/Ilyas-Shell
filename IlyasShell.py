@@ -50,7 +50,21 @@ except FileNotFoundError:
     readline.read_history_file(history_file)
 
 INTERACTIVE = False
-
+### -- ??? --
+if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
+    at = 0
+    while at < 10:
+        try:
+            for ayli in range(3):
+                print('.', end='', flush=True)
+                time.sleep(1)
+            print('\b\b\b' + ' ' * 3 + '\b\b\b', end='', flush=True)
+            time.sleep(1)
+            at += 1
+        except (KeyboardInterrupt, EOFError):
+            raise SystemExit("\rYOU HAD IT COMING")
+    raise SystemExit("\rYOU HAD IT COMING")
+        
 ### -- Команды --
 def shelp(): # к сожалению help() нельзя использовать, он зарезервирован
     if INTERACTIVE == True:
