@@ -19,6 +19,7 @@ import time
 import readline
 import traceback
 import sys
+from datetime import datetime
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
@@ -190,7 +191,8 @@ def shelp(): # к сожалению help() нельзя использоват�
             'guess <максимальное число>         - игра в угадай число\n',
             'echo <текст>                       - вывести текст\n',
             'hex [-d/-e] <число>                - перевод в шестнадцатеричную систему и наоборот\n',
-            'eval <команда>                     - опасная команда для вызова eval()'
+            'eval <команда>                     - опасная команда для вызова eval()\n',
+            'date                               - показать текущее время + дату'
         )
     elif INTERACTIVE == False:
         print(f"{ilya} Вот тебе список:\n",
@@ -390,6 +392,12 @@ def sheval(arg):
         eval(' '.join(arg))
     else:
         print(f'{stl.bd + col.r}Данное действие запрещено.{rs.all}')
+def timedate():
+    now = datetime.now()
+    time_ = now.strftime("%H:%M:%S")
+    date = now.strftime("%d.%m.%Y")
+    print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
+
 ### -- Словарики команд --
 COMMANDSWARGS = {
     'kill':kill,
@@ -415,7 +423,8 @@ COMMANDS = {
     'pif':pifagor.pifagorpy,
     'pifagor':pifagor.pifagorpy,
     'dead_list':fdead_list,
-    'version':version
+    'version':version,
+    'date':timedate
 }
 
 #  -- Основной цикл --
