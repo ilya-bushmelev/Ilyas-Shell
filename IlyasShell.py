@@ -11,6 +11,8 @@
 #   Задумка была чтобы быть улучшенной версией ilya's:cmd_, которая работает через модули.
 #   Кстати, посмотри configShell.py там находится конфиг оболочки! 
 #   Пожалуйста, не удаляй его. Без него оболочка не будет работать
+#
+#   С юбилейной 600-й строкой! 🎉🥳
 
 ### -- Импорты --
 import os
@@ -475,16 +477,16 @@ def rm(arg):
             log(f"{file} deleted")
             os.remove(file)
     except FileNotFoundError:
-        print(f"Не найдена: {folder}")
+        print(f"Не найдена: {file}")
     except PermissionError:
-        print(f"Нет прав: {folder}")
+        print(f"Нет прав: {file}")
 def rmdir(folder):
     try:
         import shutil
-        shutil.rmtree(folder)
         confirm = input(f"Внимание! Папка {folder} будет удалена {stl.rbd}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
         if confirm.lower() in ['y','yes','д','да']:
             print(f"Удалена со всем содержимым: {folder}")
+            shutil.rmtree(folder)
         else:
             return
     except FileNotFoundError:
@@ -509,7 +511,9 @@ COMMANDSWARGS = {
     'pwd':pwd,
     'ls':ls,
     'touch':touch,
-    'mkdir':mkdir
+    'mkdir':mkdir,
+    'rmdir':rmdir,
+    'rm':rmdir
 }
 COMMANDS = {
     'help':shelp,
