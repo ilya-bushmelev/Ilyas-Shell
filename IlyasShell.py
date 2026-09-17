@@ -469,7 +469,28 @@ def mkdir(arg):
             print(f"Не удалось создать: {folder}")
         except PermissionError:
             print(f"Нет прав: {folder}")
-
+def rm(arg):
+    try:
+        for file in arg:
+            log(f"{file} deleted")
+            os.remove(file)
+    except FileNotFoundError:
+        print(f"Не найдена: {folder}")
+    except PermissionError:
+        print(f"Нет прав: {folder}")
+def rmdir(folder):
+    try:
+        import shutil
+        shutil.rmtree(folder)
+        confirm = input(f"Внимание! Папка {folder} будет удалена {stl.rbd}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
+        if confirm.lower() in ['y','yes','д','да']:
+            print(f"Удалена со всем содержимым: {folder}")
+        else:
+            return
+    except FileNotFoundError:
+        print(f"Не найдена: {folder}")
+    except PermissionError:
+        print(f"Нет прав: {folder}")
 ### -- Словарики команд --
 COMMANDSWARGS = {
     'kill':kill,
