@@ -138,6 +138,8 @@ log("loaded many things from config (styles, prompt, dead_list, dont_dare)")
 
 USER = os.getlogin()
 
+CURRENT_DIR = os.getcwd()
+
 ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
 log("loaded dont_dare")
@@ -397,6 +399,43 @@ def timedate():
     time_ = now.strftime("%H:%M:%S")
     date = now.strftime("%d.%m.%Y")
     print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
+def pwd(arg=None):
+    print(os.getcwd())
+def cd(arg):
+    global CURRENT_DIR
+    
+    if not arg:
+        target = os.path.expanduser('~')
+    else:
+        target = ' '.join(arg)
+        target = os.path.expanduser(target)
+        if not os.path.isabs(target):
+            target = os.path.join(os.getcwd(), target)
+        target = os.path.normpath(target)
+    
+    if os.path.isdir(target):
+        os.chdir(target)
+        print(f'{col.g}Перешёл в: {target}{rs.all}')
+    else:
+        print(f'{col.r}Директория не найдена: {target}{rs.all}')
+def ls(arg):
+    path = ' '.join(arg) if arg else '.'
+    path = os.path.expanduser(path)
+    
+    try:
+        items = os.listdir(path)
+        for item in sorted(items):
+            full_path = os.path.join(path, item)
+            if os.path.isdir(full_path):
+                print(f'{col.b}{item}/{rs.all}')  # синий для папок
+            elif os.access(full_path, os.X_OK):
+                print(f'{col.g}{item}*{rs.all}')  # зелёный для исполняемых
+            else:
+                print(item)
+    except FileNotFoundError:
+        print(f'{col.r}Не найдено: {path}{rs.all}')
+    except PermissionError:
+        print(f'{col.r}Нет доступа: {path}{rs.all}')
 
 ### -- Словарики команд --
 COMMANDSWARGS = {
@@ -411,7 +450,10 @@ COMMANDSWARGS = {
     'binary':binary_code,
     'guess':guess,
     'hex':hex_code,
-    'eval':sheval
+    'eval':sheval,
+    'cd':cd,
+    'pwd':pwd,
+    'ls':ls
 }
 COMMANDS = {
     'help':shelp,
@@ -440,8 +482,12 @@ def StartShell(mode='normal'):
         print(f'{stl.bd}{col.g}Включенны пользовательские команды.{rs.all}')
     while True:
         try:
+            cwd = os.getcwd()
+            home = os.path.expanduser('~')
+            if cwd.startswith(home):
+                cwd = '~' + cwd[len(home):]
             log('waiting for user input')
-            inp = input(f'{prompt} > ').split()
+            inp = input(f'{prompt} {col.c}{cwd}{rs.all}> ').split()
             cmd = inp[0]
             arg = inp[1:]
             log("input completed")
