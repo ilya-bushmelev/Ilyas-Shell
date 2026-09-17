@@ -86,7 +86,6 @@ button, .button-like-a{
     box-shadow: 5px 5px 2px #111;
     transition: all 0.08s ease;
     cursor: pointer;
-
     -webkit-tap-highlight-color: transparent;
 }
 button:hover, .button-like-a:hover{

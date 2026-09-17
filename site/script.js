@@ -33,3 +33,4 @@ pyzhulya.addEventListener('dblclick', function() {
     }, 2000)
 });
 console.log("%cIlya's:Shell","background: linear-gradient(90deg, #0f0, #0ff); background-clip: text; color: transparent; font-size: 24px; font-weight: 700;")
+console.log("знали бы вы КАК Я ЗАДОЛБАЛСЯ")
