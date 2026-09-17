@@ -181,7 +181,7 @@ def shelp(): # к сожалению help() нельзя использоват�
             'dead_list                          - список мёртвых\n',
             'help                               - показать это меню\n',
             'whoami                             - показать юзернейм\n',
-            'version                            - показать версию оболочки',
+            'version                            - показать версию оболочки\n',
             'exit/quit/break                    - выйти из оболочки ;(\n',
             'calc/calculator                    - запуск скрипта calc1.py (через вызов функции, напрямую невозможно)\n',
             'rng/random/randomizer <min> <max>  - вывести рандомное число в заданом диапазоне\n',
@@ -235,8 +235,8 @@ def kill(target='Null'):
     elif target_ls not in dead_list:
         confirm = input(f'{ilya}Ты уверен? [y/N] ').lower().strip()
         if confirm in ['y', 'yes', 'д', 'да']:
-            dead_list.append(target)
-            log(f'added {target} to dead_list')
+            dead_list.append(target_ls)
+            log(f'added {target_ls} to dead_list')
             print(f'{ilya}{target} УБИТ!')
         else:
             print(f'{ilya}{col.v}{target} остаётся в живых!{rs.all}')
