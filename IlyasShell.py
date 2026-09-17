@@ -127,7 +127,7 @@ def log(msg, lvl='INFO'):
         print(f'{color}│ [{lvl}]{rs.all} {msg}')
 
 ### -- Переменные --
-__version__ = 'v1.2'
+__version__ = 'v2.0'
 
 col = configShell.col
 bg = configShell.bg
@@ -196,7 +196,14 @@ def shelp(): # к сожалению help() нельзя использоват�
             'echo <текст>                       - вывести текст\n',
             'hex [-d/-e] <число>                - перевод в шестнадцатеричную систему и наоборот\n',
             'eval <команда>                     - опасная команда для вызова eval()\n',
-            'date                               - показать текущее время + дату'
+            'date                               - показать текущее время + дату\n',
+            'cd <путь>                          - перемещение по директориям\n',
+            'ls <путь>                          - просмотреть файлы в текущей директории\n',
+            'pwd <путь>                         - полный текущий путь\n',
+            'touch <путь>                       - создать пустой файл\n',
+            'mkdir <путь>                       - создать пустую директорию\n',
+            'rm <путь>                          - удалить файл (не директорию)\n',
+            'rmdir <путь>                       - РЕКУРСИВНО удалить директорию'
         )
     elif INTERACTIVE == False:
         print(f"{ilya} Вот тебе список:\n",
@@ -476,6 +483,8 @@ def rm(arg):
         for file in arg:
             log(f"{file} deleted")
             os.remove(file)
+    except IsADirectoryError:
+        print(f"Это директория: {file} (подсказка: используйте rmdir)")
     except FileNotFoundError:
         print(f"Не найдена: {file}")
     except PermissionError:
@@ -485,8 +494,8 @@ def rmdir(folder):
         import shutil
         confirm = input(f"Внимание! Папка {folder} будет удалена {stl.rbd}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
         if confirm.lower() in ['y','yes','д','да']:
-            print(f"Удалена со всем содержимым: {folder}")
             shutil.rmtree(folder)
+            print(f"Удалена со всем содержимым: {folder}")
         else:
             return
     except FileNotFoundError:
@@ -513,7 +522,7 @@ COMMANDSWARGS = {
     'touch':touch,
     'mkdir':mkdir,
     'rmdir':rmdir,
-    'rm':rmdir
+    'rm':rm
 }
 COMMANDS = {
     'help':shelp,
