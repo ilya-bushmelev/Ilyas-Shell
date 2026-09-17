@@ -436,6 +436,39 @@ def ls(arg):
         print(f'{col.r}Не найдено: {path}{rs.all}')
     except PermissionError:
         print(f'{col.r}Нет доступа: {path}{rs.all}')
+def touch(arg):
+    if not arg:
+        print("Нет аргументов")
+        return
+    try:
+        for file in arg:
+            if os.path.exists(file):
+                print(f"{file} уже существует")
+                continue
+            open(file, 'w').close()
+    except FileNotFoundError:
+        print(f"Директория не найдена.")
+    except PermissionError:
+        print(f"Нет прав к директории.")
+def mkdir(arg):
+    if not arg:
+        print("Нет аргументов")
+        return
+    
+    for folder in arg:
+        folder = os.path.expanduser(folder)
+        
+        if os.path.exists(folder):
+            print(f"{folder} уже существует")
+            continue
+        
+        try:
+            os.makedirs(folder, exist_ok=True)
+            print(f"Создана директория: {folder}")
+        except FileNotFoundError:
+            print(f"Не удалось создать: {folder}")
+        except PermissionError:
+            print(f"Нет прав: {folder}")
 
 ### -- Словарики команд --
 COMMANDSWARGS = {
@@ -453,7 +486,9 @@ COMMANDSWARGS = {
     'eval':sheval,
     'cd':cd,
     'pwd':pwd,
-    'ls':ls
+    'ls':ls,
+    'touch':touch,
+    'mkdir':mkdir
 }
 COMMANDS = {
     'help':shelp,
