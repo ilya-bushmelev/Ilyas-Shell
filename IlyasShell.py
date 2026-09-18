@@ -140,8 +140,6 @@ log("loaded many things from config (styles, prompt, dead_list, dont_dare)")
 
 USER = os.getlogin()
 
-CURRENT_DIR = os.getcwd()
-
 ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
 log("loaded dont_dare")
@@ -451,6 +449,7 @@ def touch(arg):
         return
     try:
         for file in arg:
+            file = os.path.expanduser(file)
             if os.path.exists(file):
                 print(f"{file} уже существует")
                 continue
@@ -480,6 +479,8 @@ def mkdir(arg):
             print(f"Нет прав: {folder}")
 def rm(arg):
     try:
+        if not arg:
+            print("Синтаксис: rm <файлы ЧЕРЕЗ ПРОБЕЛ> (rm file1 file2 ...)")
         for file in arg:
             log(f"{file} deleted")
             os.remove(file)
@@ -489,8 +490,9 @@ def rm(arg):
         print(f"Не найдена: {file}")
     except PermissionError:
         print(f"Нет прав: {file}")
-def rmdir(folder):
+def rmdir(arg):
     try:
+        folder = arg[0]
         import shutil
         confirm = input(f"Внимание! Папка {folder} будет удалена {stl.rbd}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
         if confirm.lower() in ['y','yes','д','да']:
