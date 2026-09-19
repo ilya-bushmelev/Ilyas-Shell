@@ -22,6 +22,7 @@ import readline
 import traceback
 import sys
 from datetime import datetime
+import getpass
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
@@ -138,7 +139,7 @@ dead_list = configShell.DEAD_LIST
 dont_dare = configShell.KILL_BLACK_LIST
 log("loaded many things from config (styles, prompt, dead_list, dont_dare)")
 
-USER = os.getlogin()
+USER = getpass.getuser()
 
 ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
@@ -397,10 +398,13 @@ def hex_code(arg):
     except (ValueError, IndexError):
         print(f'{ilya} error')
 def sheval(arg):
-    if configShell.EVAL_ENABLED == True:
-        eval(' '.join(arg))
+    if not arg:
+        print("ты аргументы забыл")
+        return
+    if configShell.EVAL_ENABLED == True and arg[0] == '--i-know-what-i-am-doing':
+        eval(' '.join(arg[1:]))
     else:
-        print(f'{stl.bd + col.r}Данное действие запрещено.{rs.all}')
+        print(f'{stl.bd + col.r}Данное действие запрещено. Проверьте флаг --i-know-what-i-am-doing и переменную EVAL_ENABLED в конфиге{rs.all}')
 def timedate():
     now = datetime.now()
     time_ = now.strftime("%H:%M:%S")
@@ -563,12 +567,12 @@ def StartShell(mode='normal'):
             arg = inp[1:]
             log("input completed")
         except KeyboardInterrupt:
-            log('exit because interupt')
+            log('exit because interupt', "WARNING")
             INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except EOFError:
-            log('exit because eof')
+            log('exit because eof', "WARNING")
             INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
@@ -586,7 +590,7 @@ def StartShell(mode='normal'):
                 COMMANDS[cmd]()
             elif cmd in ['exit', 'break', 'quit']:
                 INTERACTIVE = False
-                log("exiting throught exit command")
+                log("exiting throught exit command", "WARNING")
                 print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
                 break
             else:
