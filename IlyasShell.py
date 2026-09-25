@@ -114,7 +114,7 @@ except ModuleNotFoundError:
 DEBUG_MODE = False
 if len(sys.argv) > 1 and sys.argv[1] == 'debug':
     DEBUG_MODE = True
-def log(msg, lvl='INFO'):
+def log(msg, lvl='INFO') -> None:
     if not DEBUG_MODE:
         return
     else:
@@ -177,7 +177,7 @@ if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     raise SystemExit("\rYOU HAD IT COMING")
         
 ### -- Команды --
-def shelp(): # к сожалению help() нельзя использовать, он зарезервирован
+def shelp() -> None: # к сожалению help() нельзя использовать, он зарезервирован
     if INTERACTIVE == True:
         print(f"{ilya} Вот тебе список:\n",
             'kill <цель>                        - убить кого-нибудь, убивать мертвого нельзя\n',
@@ -221,7 +221,7 @@ def shelp(): # к сожалению help() нельзя использоват�
 
 class KillAttemptError(Exception):
     pass
-def kill(target='Null'):
+def kill(target:str='Null') -> None:
     if target == 'Null' or not target:
         log('no args were given', "WARNING")
         target = input(f'{ilya} Кого хочешь {col.r}{stl.bd}убить? {rs.all}{col.y}')
@@ -256,7 +256,7 @@ def kill(target='Null'):
         log("target already in dead_list", "WARNING")
         print(f'{ilya} как я смогу убить мёртвого?')
 
-def revive(target='Null'):
+def revive(target:str='Null') -> None:
     global dead_list
     if target == 'Null' or not target:
         log("no args were given", "WARNING")
@@ -288,9 +288,9 @@ def revive(target='Null'):
     else:
         print(f"{col.r}{stl.bd}???: {col.y}{target} is already alive.{rs.all}")
         time.sleep(2)
-def version():
+def version() -> None:
     print(f'{col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell{col.y} Версия оболочки: {__version__}')
-def whoami():
+def whoami() -> None:
     # омг посхалко
     if USER == f'ilya':
         log("you discovered an easter egg!")
@@ -312,7 +312,7 @@ def whoami():
     else:
         print(f"{ilya} Тебя зовут {col.y}{stl.bd}{USER}.")
 
-def guess(arg='Null'):
+def guess(arg:str='Null'):
     if arg == 'Null' or not arg:
         log('no args were given', "WARNING")
         max_num = int(input(f'{ilya} Перед началом, напиши число лимита: '))
@@ -342,10 +342,10 @@ def guess(arg='Null'):
             break
         except EOFError:
             print(f'{ilya} почему?? ;(')
-def echo(arg):
+def echo(arg:str) -> None:
     echout = ' '.join(arg)
     print(f'{echout}')
-def rng(arg):
+def rng(arg:str) -> None:
     if len(arg) < 2:
         print(f"{ilya} Синтаксис: rng <min> <max>")
         return
@@ -359,13 +359,13 @@ def rng(arg):
         print(f"{ilya} Вводи только числа! Минимальное число не может быть больше максимального!!")
     except IndexError:
         print(f'{ilya} (илья не придумал сообщение)')
-def fdead_list():
+def fdead_list() -> None:
     global dead_list
     if dead_list:
         print(f"{col.r}{stl.bd}Илья: Убитые: {', '.join(dead_list)}{col.w}")
     else:
         print(f"{col.g}{stl.bd}Илья: Все живы.{col.w}")
-def binary_code(arg):
+def binary_code(arg) -> None:
     try:
         flag = arg[0]
         num = int(arg[1])
@@ -386,7 +386,7 @@ def binary_code(arg):
         print(f'{ilya} error')
     except IndexError:
         print(f'{ilya} error')
-def hex_code(arg):
+def hex_code(arg:str) -> str:
     try:
         flag = arg[0]
         num = int(arg[1])
@@ -395,9 +395,10 @@ def hex_code(arg):
         elif flag == '-d':
             result = int(str(num), 16)
         print(f'{ilya} Результат: {result}')
+        return result
     except (ValueError, IndexError):
         print(f'{ilya} error')
-def sheval(arg):
+def sheval(arg:str):
     if not arg:
         print("ты аргументы забыл")
         return
@@ -410,9 +411,9 @@ def timedate():
     time_ = now.strftime("%H:%M:%S")
     date = now.strftime("%d.%m.%Y")
     print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
-def pwd(arg=None):
+def pwd(arg:str=None):
     print(os.getcwd())
-def cd(arg):
+def cd(arg:str) -> None:
     global CURRENT_DIR
     
     if not arg:
@@ -429,7 +430,7 @@ def cd(arg):
         print(f'{col.g}Перешёл в: {target}{rs.all}')
     else:
         print(f'{col.r}Директория не найдена: {target}{rs.all}')
-def ls(arg):
+def ls(arg:str) -> None:
     path = ' '.join(arg) if arg else '.'
     path = os.path.expanduser(path)
     
@@ -447,7 +448,7 @@ def ls(arg):
         print(f'{col.r}Не найдено: {path}{rs.all}')
     except PermissionError:
         print(f'{col.r}Нет доступа: {path}{rs.all}')
-def touch(arg):
+def touch(arg:str) -> None:
     if not arg:
         print("Нет аргументов")
         return
@@ -462,7 +463,7 @@ def touch(arg):
         print(f"Директория не найдена.")
     except PermissionError:
         print(f"Нет прав к директории.")
-def mkdir(arg):
+def mkdir(arg:str) -> None:
     if not arg:
         print("Нет аргументов")
         return
@@ -481,7 +482,7 @@ def mkdir(arg):
             print(f"Не удалось создать: {folder}")
         except PermissionError:
             print(f"Нет прав: {folder}")
-def rm(arg):
+def rm(arg:str) -> None:
     try:
         if not arg:
             print("Синтаксис: rm <файлы ЧЕРЕЗ ПРОБЕЛ> (rm file1 file2 ...)")
@@ -494,7 +495,7 @@ def rm(arg):
         print(f"Не найдена: {file}")
     except PermissionError:
         print(f"Нет прав: {file}")
-def rmdir(arg):
+def rmdir(arg:str) -> None:
     try:
         folder = arg[0]
         import shutil
@@ -545,7 +546,7 @@ COMMANDS = {
 }
 
 #  -- Основной цикл --
-def StartShell(mode='normal'):
+def StartShell() -> None:
     global INTERACTIVE
     INTERACTIVE = True
     # приветствие при запуске StartShell()
