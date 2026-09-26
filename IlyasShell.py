@@ -23,6 +23,7 @@ import traceback
 import sys
 from datetime import datetime
 import getpass
+from typing import Callable
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
@@ -365,40 +366,40 @@ def fdead_list() -> None:
         print(f"{col.r}{stl.bd}Илья: Убитые: {', '.join(dead_list)}{col.w}")
     else:
         print(f"{col.g}{stl.bd}Илья: Все живы.{col.w}")
-def binary_code(arg) -> None:
+def binary_code(arg:str) -> None:
     try:
         flag = arg[0]
-        num = int(arg[1])
-        binstr = arg[1]
+        raw_num:int = int(arg[1])
+        raw_str = arg[1]
         if flag == '-e':
             bin_num = []
-            while num > 0:
-                ostatok = num % 2
+            while raw_num > 0:
+                ostatok = raw_num % 2
                 if ostatok == 1:
                     bin_num.append(str(1))
                 else:
                     bin_num.append(str(0))
-                num //= 2
-            print(f'{ilya} Результат: {''.join(reversed(bin_num))}')
+                raw_num //= 2
+            result = ''.join(reversed(bin_num))
+            print(f'{ilya} Результат: {result}')
         elif flag == '-d':
-            print(f'{ilya} Результат: {int(binstr, 2)}')
+            print(f'{ilya} Результат: {int(raw_str, 2)}')
     except ValueError:
         print(f'{ilya} error')
     except IndexError:
         print(f'{ilya} error')
-def hex_code(arg:str) -> str:
+def hex_code(arg:str) -> None:
     try:
         flag = arg[0]
-        num = int(arg[1])
+        number = int(arg[1])
         if flag == '-e':
-            result = hex(num)
+            hex_result = hex(number)
         elif flag == '-d':
-            result = int(str(num), 16)
-        print(f'{ilya} Результат: {result}')
-        return result
+            hex_result = int(str(number), 16)
+        print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
-def sheval(arg:str):
+def sheval(arg:str) -> None:
     if not arg:
         print("ты аргументы забыл")
         return
@@ -411,7 +412,7 @@ def timedate():
     time_ = now.strftime("%H:%M:%S")
     date = now.strftime("%d.%m.%Y")
     print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
-def pwd(arg:str=None):
+def pwd(arg:str='null'):
     print(os.getcwd())
 def cd(arg:str) -> None:
     global CURRENT_DIR
@@ -499,7 +500,7 @@ def rmdir(arg:str) -> None:
     try:
         folder = arg[0]
         import shutil
-        confirm = input(f"Внимание! Папка {folder} будет удалена {stl.rbd}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
+        confirm = input(f"Внимание! Папка {folder} будет удалена {stl.bd + col.r}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
         if confirm.lower() in ['y','yes','д','да']:
             shutil.rmtree(folder)
             print(f"Удалена со всем содержимым: {folder}")
@@ -510,7 +511,7 @@ def rmdir(arg:str) -> None:
     except PermissionError:
         print(f"Нет прав: {folder}")
 ### -- Словарики команд --
-COMMANDSWARGS = {
+COMMANDSWARGS: dict[str, Callable] = {
     'kill':kill,
     'revive':revive,
     'rspawn':revive,
@@ -531,7 +532,7 @@ COMMANDSWARGS = {
     'rmdir':rmdir,
     'rm':rm
 }
-COMMANDS = {
+COMMANDS:dict[str,Callable] = {
     'help':shelp,
     'whoami':whoami,
     'calc':calc1.calcdotpy,

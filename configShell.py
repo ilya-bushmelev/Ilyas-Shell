@@ -1,3 +1,5 @@
+# Для аннотаций
+from typing import Callable
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -42,9 +44,9 @@ class rs:
 
 
 PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
-DEAD_LIST = []
+DEAD_LIST: list[str] = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
-KILL_BLACK_LIST = []
+KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
 
 # -- Пользовательские команды --
@@ -56,8 +58,8 @@ class USER_COMMANDS:
         text = ' '.join(arg)
         print(f"Чижик говорит: {text}")
     # -- Ссылки на команды --
-    list_with_args = {
+    list_with_args:dict[str,Callable] = {
         'chizhik_says': chizhik_says
-    }; list_ = {
+    }; list_:dict[str,Callable] = {
         # пока здесь пусто ;(
     }
