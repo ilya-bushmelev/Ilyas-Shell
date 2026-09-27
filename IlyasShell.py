@@ -24,9 +24,14 @@ import sys
 from datetime import datetime
 import getpass
 from typing import Callable
+from decorator import command, COMMANDS, COMMANDSWARGS, COMMANDS_META
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
+# Для аннотаций
+from typing import Callable
+# Для пользовательских команд
+from decorator import command
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -71,27 +76,18 @@ class rs:
 
 
 PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
-DEAD_LIST = []
+DEAD_LIST: list[str] = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
-KILL_BLACK_LIST = []
+KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
 
 # -- Пользовательские команды --
-class USER_COMMANDS:
-    enabled = False
-
-    # -- Команды --
-    def chizhik_says(arg):
-        text = ' '.join(arg)
-        print(f"Чижик говорит: {text}")
-    # -- Ссылки на команды --
-    list_with_args = {
-        'chizhik_says': chizhik_says
-    }; list_ = {
-        # пока здесь пусто ;(
-    }
+@command(name='chizhik_says',desc='чижик говорит: ...', args=True)
+def chizhik_says(arg):
+    text = ' '.join(arg)
+    print(f"Чижик говорит: {text}")
 '''
 
 try:
@@ -178,33 +174,7 @@ if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
             raise SystemExit("\rYOU HAD IT COMING")
     raise SystemExit("\rYOU HAD IT COMING")
 
-### -- Словари для команд --
-COMMANDS = {}
-COMMANDSWARGS = {}
-COMMANDS_META = {}
 
-### -- Декоратор --
-def command(name:str, args:bool=False, desc:str="null", aliases:list=None):
-    def decorator(func):
-        cmd_name = name
-        if args:
-            COMMANDSWARGS[cmd_name] = func
-        else:
-            COMMANDS[cmd_name] = func
-        if aliases:
-            for alias in aliases:
-                if args:
-                    COMMANDSWARGS[alias] = func
-                else:
-                    COMMANDS[alias] = func
-        COMMANDS_META[cmd_name] = {
-            'aliases': aliases or [],
-            'desc': desc,
-            'args': args
-        }
-        
-        return func
-    return decorator
 log("commands decorator loaded")
 
 ### -- Команды --
@@ -543,7 +513,8 @@ def gen_help() -> str:
         args = meta.get('args',False)
         name_part = cmd + ("/" + "/".join(aliases) if aliases else "")
         pre_result = name_part + (" <аргументы> " if args else "")
-        result = pre_result + " " * (50 - len(pre_result)) + f" - {desc}"
+        padding = max(1, 50 - len(pre_result))
+        result = pre_result + " " * padding + f" - {desc}"
         lines.append(result)
     return "\n".join(lines)
         
@@ -553,10 +524,6 @@ def StartShell() -> None:
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
-    if configShell.USER_COMMANDS.enabled == True:
-        COMMANDS.update(configShell.USER_COMMANDS.list_ )
-        COMMANDSWARGS.update(configShell.USER_COMMANDS.list_with_args)
-        print(f'{stl.bd}{col.g}Включенны пользовательские команды.{rs.all}')
     while True:
         try:
             cwd = os.getcwd()

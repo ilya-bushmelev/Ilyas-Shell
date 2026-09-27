@@ -1,5 +1,7 @@
 # Для аннотаций
 from typing import Callable
+# Для пользовательских команд
+from decorator import command
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -52,16 +54,7 @@ INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
 
 # -- Пользовательские команды --
-class USER_COMMANDS:
-    enabled = False
-
-    # -- Команды --
-    def chizhik_says(arg):
-        text = ' '.join(arg)
-        print(f"Чижик говорит: {text}")
-    # -- Ссылки на команды --
-    list_with_args:dict[str,Callable] = {
-        'chizhik_says': chizhik_says
-    }; list_:dict[str,Callable] = {
-        # пока здесь пусто ;(
-    }
+@command(name='chizhik_says',desc='чижик говорит: ...', args=True)
+def chizhik_says(arg):
+    text = ' '.join(arg)
+    print(f"Чижик говорит: {text}")
