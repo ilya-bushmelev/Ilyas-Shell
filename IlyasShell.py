@@ -4,7 +4,7 @@
 #           / - IlyasShell.py ------------- [-][0][X] \
 #           |   ### ---------------------------- ###  |
 #           |   ### -----<( Ilya's:Shell )>----- ###  |
-#           |   ### -------- ( v2.0 ) ---------- ###  |
+#           |   ### -------- ( v2.1 ) ---------- ###  |
 #           |   ### ---------------------------- ###  |
 #           \ --------------------------------------- /
 #   Приветствую в коде оболочки! Код полностью читаемый и понятный.
@@ -12,7 +12,7 @@
 #   Кстати, посмотри configShell.py там находится конфиг оболочки! 
 #   Пожалуйста, не удаляй его. Без него оболочка не будет работать
 #
-#   С юбилейной 600-й строкой! 🎉🥳
+#   С юбилейной 600-й строкой? 
 
 ### -- Импорты --
 import os
@@ -28,8 +28,6 @@ from decorator import command, COMMANDS, COMMANDSWARGS, COMMANDS_META
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
-# Для аннотаций
-from typing import Callable
 # Для пользовательских команд
 from decorator import command
 class col:
@@ -127,7 +125,7 @@ def log(msg, lvl='INFO') -> None:
         print(f'{color}│ [{lvl}]{rs.all} {msg}')
 
 ### -- Переменные --
-__version__ = 'v2.0'
+__version__ = 'v2.1'
 
 col = configShell.col
 bg = configShell.bg
@@ -176,6 +174,21 @@ if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
 
 
 log("commands decorator loaded")
+
+### -- Генератор списка помощи по командам (просто читает COMMANDS_META) --
+def gen_help() -> str:
+    lines = []
+    for cmd,meta in COMMANDS_META.items():
+        desc = meta.get('desc','без описания')
+        aliases = meta.get('aliases',[])
+        args = meta.get('args',False)
+        name_part = stl.bd + col.g + cmd + ("/" + "/".join(aliases) if aliases else "") + rs.all
+        pre_result = name_part + (" <аргументы> " if args else "")
+        padding = max(1, 50 - len(pre_result))
+        result = pre_result + " " * padding + f"{col.c} - {desc}{rs.all}"
+        lines.append(result)
+    return "\n".join(lines)
+   
 
 ### -- Команды --
 @command(name='help',desc="показать это меню")
@@ -277,7 +290,7 @@ def whoami() -> None:
         time.sleep(2)
     else:
         print(f"{ilya} Тебя зовут {col.y}{stl.bd}{USER}.")
-@command(name="guess",desc='игра в "угадай число"')
+@command(name="guess",desc='игра в "угадай число"',args=True)
 def guess(arg:str='Null'):
     if arg == 'Null' or not arg:
         log('no args were given', "WARNING")
@@ -361,11 +374,12 @@ def binary_code(arg:str) -> None:
 def hex_code(arg:str) -> None:
     try:
         flag = arg[0]
-        number = int(arg[1])
+        number = arg[1]
         if flag == '-e':
-            hex_result = hex(number)
+            hex_result = hex(int(number))
         elif flag == '-d':
-            hex_result = int(str(number), 16)
+            number = number.replace('0x', '').replace('0X', '')
+            hex_result = int(number, 16)
         print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
@@ -384,8 +398,8 @@ def timedate():
     time_ = now.strftime("%H:%M:%S")
     date = now.strftime("%d.%m.%Y")
     print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
-@command(name='pwd',desc="вывод текущего пути",args=True)
-def pwd(arg:str='null'):
+@command(name='pwd',desc="вывод текущего пути")
+def pwd():
     print(os.getcwd())
 @command(name='cd',desc="поменять директорию",args=True)
 def cd(arg:str) -> None:
@@ -477,6 +491,9 @@ def rm(arg:str) -> None:
 @command(name='rmdir',desc="рекурсивное удаление директории", args=True)
 def rmdir(arg:str) -> None:
     try:
+        if not arg:
+            print("Синтаксис: rmdir <путь>")
+            return
         folder = arg[0]
         import shutil
         confirm = input(f"Внимание! Папка {folder} будет удалена {stl.bd + col.r}рекурсивно и безвозвратно{rs.all}!\nВы уверены что хотите продолжить? [y/N] ")
@@ -489,6 +506,12 @@ def rmdir(arg:str) -> None:
         print(f"Не найдена: {folder}")
     except PermissionError:
         print(f"Нет прав: {folder}")
+@command(name='exit',desc='выйти из оболочки :(',aliases=['quit','break','leave','goodbye'])
+def shell_exit():
+    log('exit because exit command', "WARNING")
+    print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
+    sys.exit(0)
+
 ### -- calc1.py и pifagor.py --
 try:
     if configShell.INCLUDE_CALC1 == True:
@@ -503,21 +526,6 @@ try:
             pifagor.pifagorpy()
 except (AttributeError, ImportError):
     print("При импорте некоторых дополнений возникла ошибка.")
-
-### -- Генератор списка помощи по командам (просто читает COMMANDS_META) --
-def gen_help() -> str:
-    lines = []
-    for cmd,meta in COMMANDS_META.items():
-        desc = meta.get('desc','без описания')
-        aliases = meta.get('aliases',[])
-        args = meta.get('args',False)
-        name_part = cmd + ("/" + "/".join(aliases) if aliases else "")
-        pre_result = name_part + (" <аргументы> " if args else "")
-        padding = max(1, 50 - len(pre_result))
-        result = pre_result + " " * padding + f" - {desc}"
-        lines.append(result)
-    return "\n".join(lines)
-        
 
 ###  -- Основной цикл --
 def StartShell() -> None: 

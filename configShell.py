@@ -1,5 +1,3 @@
-# Для аннотаций
-from typing import Callable
 # Для пользовательских команд
 from decorator import command
 class col:
