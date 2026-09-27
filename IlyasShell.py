@@ -75,6 +75,8 @@ DEAD_LIST = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
 KILL_BLACK_LIST = []
 EVAL_ENABLED = False
+INCLUDE_CALC1 = False
+INCLUDE_PIFAGOR = False
 
 # -- Пользовательские команды --
 class USER_COMMANDS:
@@ -141,6 +143,7 @@ dont_dare = configShell.KILL_BLACK_LIST
 log("loaded many things from config (styles, prompt, dead_list, dont_dare)")
 
 USER = getpass.getuser()
+log(f"define user name ({USER})")
 
 ilya = f'{col.g}{stl.bd}Илья:{rs.all}'
 
@@ -176,52 +179,44 @@ if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
         except (KeyboardInterrupt, EOFError):
             raise SystemExit("\rYOU HAD IT COMING")
     raise SystemExit("\rYOU HAD IT COMING")
+
+### -- Словари для команд --
+COMMANDS = {}
+COMMANDSWARGS = {}
+COMMANDS_META = {}
+
+### -- Декоратор --
+def command(name:str, args:bool=False, desc:str="null", aliases:list=None):
+    def decorator(func):
+        cmd_name = name
+        if args:
+            COMMANDSWARGS[cmd_name] = func
+        else:
+            COMMANDS[cmd_name] = func
+        if aliases:
+            for alias in aliases:
+                if args:
+                    COMMANDSWARGS[alias] = func
+                else:
+                    COMMANDS[alias] = func
+        COMMANDS_META[cmd_name] = {
+            'aliases': aliases or [],
+            'desc': desc,
+            'args': args
+        }
         
+        return func
+    return decorator
+log("commands decorator loaded")
+
 ### -- Команды --
+@command(name='help',desc="показать это меню")
 def shelp() -> None: # к сожалению help() нельзя использовать, он зарезервирован
-    if INTERACTIVE == True:
-        print(f"{ilya} Вот тебе список:\n",
-            'kill <цель>                        - убить кого-нибудь, убивать мертвого нельзя\n',
-            'revive <цель>                      - возродить кого-нибудь, возрождать живого тоже нельзя\n',
-            'dead_list                          - список мёртвых\n',
-            'help                               - показать это меню\n',
-            'whoami                             - показать юзернейм\n',
-            'version                            - показать версию оболочки\n',
-            'exit/quit/break                    - выйти из оболочки ;(\n',
-            'calc/calculator                    - запуск скрипта calc1.py (через вызов функции, напрямую невозможно)\n',
-            'rng/random/randomizer <min> <max>  - вывести рандомное число в заданом диапазоне\n',
-            'pif/pifagor                        - запуск скрипта pifagor.py (через вызов функции, напрямую невозможно)\n',
-            'binary [-d/-e] <число>             - перевод число в двоичную систему и обратно\n',
-            'guess <максимальное число>         - игра в угадай число\n',
-            'echo <текст>                       - вывести текст\n',
-            'hex [-d/-e] <число>                - перевод в шестнадцатеричную систему и наоборот\n',
-            'eval <команда>                     - опасная команда для вызова eval()\n',
-            'date                               - показать текущее время + дату\n',
-            'cd <путь>                          - перемещение по директориям\n',
-            'ls <путь>                          - просмотреть файлы в текущей директории\n',
-            'pwd <путь>                         - полный текущий путь\n',
-            'touch <путь>                       - создать пустой файл\n',
-            'mkdir <путь>                       - создать пустую директорию\n',
-            'rm <путь>                          - удалить файл (не директорию)\n',
-            'rmdir <путь>                       - РЕКУРСИВНО удалить директорию'
-        )
-    elif INTERACTIVE == False:
-        print(f"{ilya} Вот тебе список:\n",
-            f"{stl.bd}StartShell()              - запустить оболочку в интерактивном режиме{rs.all}\n",
-            "kill(['<цель>'])           - убить кого-нибудь, убивать мертвого нельзя\n",
-            "revive(['<цель>'])         - возродить кого-нибудь, возрождать живого тоже нельзя\n",
-            "fdead_list()               - список мёртвых\n",
-            "shelp()                    - показать это меню\n",
-            "whoami()                   - показать юзернейм\n"
-            "calcdotpy()                - запуск скрипта calc1.py, импортировать перед запуском\n",
-            "rng([<min>, <max>])        - вывести рандомное число в заданном диапазоне\n",
-            "pifagorpy()                - запуск скрипта pifagor.py, импортировать перед запуском\n",
-            "guess([<макс. число>])     - игра в угадай число\n",
-            "echo(['<текст>'])          - вывести текст, конкретно здесь это бесполезно, используйте лучше print()"
-        )
+    print(f"{ilya} Вот тебе список:\n{gen_help()}")
 
 class KillAttemptError(Exception):
     pass
+@command(name='kill',desc='убить кого-нибудь',args=True)
 def kill(target:str='Null') -> None:
     if target == 'Null' or not target:
         log('no args were given', "WARNING")
@@ -256,7 +251,7 @@ def kill(target:str='Null') -> None:
     else:
         log("target already in dead_list", "WARNING")
         print(f'{ilya} как я смогу убить мёртвого?')
-
+@command(name='revive',desc='возродить кого-нибудь',args=True,aliases=['rebirth','respawn'])
 def revive(target:str='Null') -> None:
     global dead_list
     if target == 'Null' or not target:
@@ -289,8 +284,10 @@ def revive(target:str='Null') -> None:
     else:
         print(f"{col.r}{stl.bd}???: {col.y}{target} is already alive.{rs.all}")
         time.sleep(2)
+@command(name='version',desc='показать версию')
 def version() -> None:
     print(f'{col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell{col.y} Версия оболочки: {__version__}')
+@command(name='whoami',desc="показать имя пользователя")
 def whoami() -> None:
     # омг посхалко
     if USER == f'ilya':
@@ -312,7 +309,7 @@ def whoami() -> None:
         time.sleep(2)
     else:
         print(f"{ilya} Тебя зовут {col.y}{stl.bd}{USER}.")
-
+@command(name="guess",desc='игра в "угадай число"')
 def guess(arg:str='Null'):
     if arg == 'Null' or not arg:
         log('no args were given', "WARNING")
@@ -343,9 +340,11 @@ def guess(arg:str='Null'):
             break
         except EOFError:
             print(f'{ilya} почему?? ;(')
+@command(name='echo',desc="вывести текст",args=True)
 def echo(arg:str) -> None:
     echout = ' '.join(arg)
     print(f'{echout}')
+@command(name='rng',desc="вывод случайного числа",args=True,aliases=['random','randomizer'])
 def rng(arg:str) -> None:
     if len(arg) < 2:
         print(f"{ilya} Синтаксис: rng <min> <max>")
@@ -360,12 +359,14 @@ def rng(arg:str) -> None:
         print(f"{ilya} Вводи только числа! Минимальное число не может быть больше максимального!!")
     except IndexError:
         print(f'{ilya} (илья не придумал сообщение)')
+@command(name='dead_list',desc="вывод списка мёртвых")
 def fdead_list() -> None:
     global dead_list
     if dead_list:
         print(f"{col.r}{stl.bd}Илья: Убитые: {', '.join(dead_list)}{col.w}")
     else:
         print(f"{col.g}{stl.bd}Илья: Все живы.{col.w}")
+@command(name="binary",desc="перевод в двоичную систему и наоборот",args=True)
 def binary_code(arg:str) -> None:
     try:
         flag = arg[0]
@@ -388,6 +389,7 @@ def binary_code(arg:str) -> None:
         print(f'{ilya} error')
     except IndexError:
         print(f'{ilya} error')
+@command(name='hex',desc="перевод шестнадцатеричную систему и наоборот",args=True)
 def hex_code(arg:str) -> None:
     try:
         flag = arg[0]
@@ -399,7 +401,8 @@ def hex_code(arg:str) -> None:
         print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
-def sheval(arg:str) -> None:
+@command(name='eval',desc="опасная команда для вызова eval()", args=True)
+def ebal(arg:str) -> None:
     if not arg:
         print("ты аргументы забыл")
         return
@@ -407,13 +410,16 @@ def sheval(arg:str) -> None:
         eval(' '.join(arg[1:]))
     else:
         print(f'{stl.bd + col.r}Данное действие запрещено. Проверьте флаг --i-know-what-i-am-doing и переменную EVAL_ENABLED в конфиге{rs.all}')
+@command(name='time',desc="вывод текущего времени и даты",aliases=["date",'timedate','datetime'])
 def timedate():
     now = datetime.now()
     time_ = now.strftime("%H:%M:%S")
     date = now.strftime("%d.%m.%Y")
     print(f"{col.c + stl.bd}⌚ Время: {time_} {rs.fg + col.g}📆 Дата: {date}{rs.all}")
+@command(name='pwd',desc="вывод текущего пути",args=True)
 def pwd(arg:str='null'):
     print(os.getcwd())
+@command(name='cd',desc="поменять директорию",args=True)
 def cd(arg:str) -> None:
     global CURRENT_DIR
     
@@ -431,6 +437,7 @@ def cd(arg:str) -> None:
         print(f'{col.g}Перешёл в: {target}{rs.all}')
     else:
         print(f'{col.r}Директория не найдена: {target}{rs.all}')
+@command(name='ls',desc="просмотр файлов в текущей директории",args=True)
 def ls(arg:str) -> None:
     path = ' '.join(arg) if arg else '.'
     path = os.path.expanduser(path)
@@ -449,6 +456,7 @@ def ls(arg:str) -> None:
         print(f'{col.r}Не найдено: {path}{rs.all}')
     except PermissionError:
         print(f'{col.r}Нет доступа: {path}{rs.all}')
+@command(name='touch',desc="создание файла",args=True)
 def touch(arg:str) -> None:
     if not arg:
         print("Нет аргументов")
@@ -464,6 +472,7 @@ def touch(arg:str) -> None:
         print(f"Директория не найдена.")
     except PermissionError:
         print(f"Нет прав к директории.")
+@command(name="mkdir",desc='создание директории',args=True)
 def mkdir(arg:str) -> None:
     if not arg:
         print("Нет аргументов")
@@ -483,6 +492,7 @@ def mkdir(arg:str) -> None:
             print(f"Не удалось создать: {folder}")
         except PermissionError:
             print(f"Нет прав: {folder}")
+@command(name='rm',desc="удаление файлов",args=True)
 def rm(arg:str) -> None:
     try:
         if not arg:
@@ -496,6 +506,7 @@ def rm(arg:str) -> None:
         print(f"Не найдена: {file}")
     except PermissionError:
         print(f"Нет прав: {file}")
+@command(name='rmdir',desc="рекурсивное удаление директории", args=True)
 def rmdir(arg:str) -> None:
     try:
         folder = arg[0]
@@ -510,46 +521,37 @@ def rmdir(arg:str) -> None:
         print(f"Не найдена: {folder}")
     except PermissionError:
         print(f"Нет прав: {folder}")
-### -- Словарики команд --
-COMMANDSWARGS: dict[str, Callable] = {
-    'kill':kill,
-    'revive':revive,
-    'rspawn':revive,
-    'rebirth':revive,
-    'echo':echo,
-    'rng':rng,
-    'random':rng,
-    'randomizer':rng,
-    'binary':binary_code,
-    'guess':guess,
-    'hex':hex_code,
-    'eval':sheval,
-    'cd':cd,
-    'pwd':pwd,
-    'ls':ls,
-    'touch':touch,
-    'mkdir':mkdir,
-    'rmdir':rmdir,
-    'rm':rm
-}
-COMMANDS:dict[str,Callable] = {
-    'help':shelp,
-    'whoami':whoami,
-    'calc':calc1.calcdotpy,
-    'calc1':calc1.calcdotpy,
-    'calc1.py':calc1.calcdotpy,
-    'calculator':calc1.calcdotpy,
-    'pif':pifagor.pifagorpy,
-    'pifagor':pifagor.pifagorpy,
-    'dead_list':fdead_list,
-    'version':version,
-    'date':timedate
-}
+### -- calc1.py и pifagor.py --
+try:
+    if configShell.INCLUDE_CALC1 == True:
+        import calc1
+        @command(name='calc',desc='простой калькулятор',aliases=['calculator','calc1.py'])
+        def startcalc():
+            calc1.calcdotpy()
+    if configShell.INCLUDE_PIFAGOR == True:
+        import pifagor
+        @command(name='pif',desc="простой решатель теоремы пифагора", aliases=['pifagor'])
+        def startpif():
+            pifagor.pifagorpy()
+except (AttributeError, ImportError):
+    print("При импорте некоторых дополнений возникла ошибка.")
 
-#  -- Основной цикл --
+### -- Генератор списка помощи по командам (просто читает COMMANDS_META) --
+def gen_help() -> str:
+    lines = []
+    for cmd,meta in COMMANDS_META.items():
+        desc = meta.get('desc','без описания')
+        aliases = meta.get('aliases',[])
+        args = meta.get('args',False)
+        name_part = cmd + ("/" + "/".join(aliases) if aliases else "")
+        pre_result = name_part + (" <аргументы> " if args else "")
+        result = pre_result + " " * (50 - len(pre_result)) + f" - {desc}"
+        lines.append(result)
+    return "\n".join(lines)
+        
+
+###  -- Основной цикл --
 def StartShell() -> None:
-    global INTERACTIVE
-    INTERACTIVE = True
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
@@ -570,12 +572,10 @@ def StartShell() -> None:
             log("input completed")
         except KeyboardInterrupt:
             log('exit because interupt', "WARNING")
-            INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except EOFError:
             log('exit because eof', "WARNING")
-            INTERACTIVE = False
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except IndexError:
@@ -590,11 +590,6 @@ def StartShell() -> None:
             elif cmd in COMMANDS:
                 log(f"executing {cmd}")
                 COMMANDS[cmd]()
-            elif cmd in ['exit', 'break', 'quit']:
-                INTERACTIVE = False
-                log("exiting throught exit command", "WARNING")
-                print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
-                break
             else:
                 print(configShell.COMMAND_NOT_FOUND)
         except Exception as e:

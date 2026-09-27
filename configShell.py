@@ -48,6 +48,8 @@ DEAD_LIST: list[str] = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
 KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
+INCLUDE_CALC1 = False
+INCLUDE_PIFAGOR = False
 
 # -- Пользовательские команды --
 class USER_COMMANDS:
