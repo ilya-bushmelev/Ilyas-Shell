@@ -160,8 +160,6 @@ except FileNotFoundError:
     open(history_file, 'w').close()
     readline.read_history_file(history_file)
     log('succesfully readed history file')
-
-INTERACTIVE = False
 ### -- ??? --
 if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     at = 0
@@ -551,7 +549,7 @@ def gen_help() -> str:
         
 
 ###  -- Основной цикл --
-def StartShell() -> None:
+def StartShell() -> None: 
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
