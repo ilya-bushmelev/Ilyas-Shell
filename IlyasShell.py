@@ -28,8 +28,6 @@ from decorator import command, COMMANDS, COMMANDSWARGS, COMMANDS_META
 
 # -- Импорт конфига --
 CFG_TEMPLATE = r'''
-# Для пользовательских команд
-from decorator import command
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -80,12 +78,7 @@ KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
-
-# -- Пользовательские команды --
-@command(name='chizhik_says',desc='чижик говорит: ...', args=True)
-def chizhik_says(arg):
-    text = ' '.join(arg)
-    print(f"Чижик говорит: {text}")
+USER_COMMANDS_ENABLED = False
 '''
 
 try:
@@ -511,6 +504,15 @@ def shell_exit():
     log('exit because exit command', "WARNING")
     print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
     sys.exit(0)
+
+### -- Импорт кастомных команд --
+try:
+    import userCommands
+    log('loaded userCommands.py')
+except ModuleNotFoundError:
+    log('userCommands.py not found, skipping', 'WARNING')
+except Exception as e:
+    print(f'{col.y}{stl.bd}Ошибка в userCommands.py:{rs.all} {type(e).__name__}: {e}')
 
 ### -- calc1.py и pifagor.py --
 try:

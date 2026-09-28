@@ -4,9 +4,11 @@ COMMANDSWARGS = {}
 COMMANDS_META = {}
 
 ### -- Декоратор --
-def command(name:str, args:bool=False, desc:str="null", aliases:list=None):
+def command(name:str, desc:str="null", args:bool=False, aliases:list=None):
     def decorator(func):
         cmd_name = name
+        if cmd_name in COMMANDS_META or cmd_name in COMMANDSWARGS or cmd_name in COMMANDS:
+            raise ValueError(f"{cmd_name} already exists")
         if args:
             COMMANDSWARGS[cmd_name] = func
         else:
