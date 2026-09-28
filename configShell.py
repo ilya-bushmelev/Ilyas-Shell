@@ -1,5 +1,3 @@
-# Для пользовательских команд
-from decorator import command
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -50,9 +48,4 @@ KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
-
-# -- Пользовательские команды --
-@command(name='chizhik_says',desc='чижик говорит: ...', args=True)
-def chizhik_says(arg):
-    text = ' '.join(arg)
-    print(f"Чижик говорит: {text}")
+USER_COMMANDS_ENABLED = True

@@ -7,10 +7,18 @@
 #           |   ### -------- ( v2.1 ) ---------- ###  |
 #           |   ### ---------------------------- ###  |
 #           \ --------------------------------------- /
+
 #   Приветствую в коде оболочки! Код полностью читаемый и понятный.
 #   Задумка была чтобы быть улучшенной версией ilya's:cmd_, которая работает через модули.
 #   Кстати, посмотри configShell.py там находится конфиг оболочки! 
-#   Пожалуйста, не удаляй его. Без него оболочка не будет работать
+#   Пожалуйста, не удаляй его. Без него оболочка не будет работать.
+#   Оболочка поддерживает пользовательские команды, создавай их в userCommands.py,
+#   гайд по настройке кастомных команд есть в README.md.
+
+#   Ссылки проекта:
+#     GitHub Репозиторий: https://github.com/ilya-bushmelev/Ilyas-Shell
+#     Сайт (GitHub Pages): https://ilya-bushmelev.github.io/Ilyas-Shell
+#     Автор проекта: https://github.com/ilya-bushmelev
 #
 #   С юбилейной 600-й строкой? 
 
@@ -26,10 +34,8 @@ import getpass
 from typing import Callable
 from decorator import command, COMMANDS, COMMANDSWARGS, COMMANDS_META
 
-# -- Импорт конфига --
+### -- Импорт конфига --
 CFG_TEMPLATE = r'''
-# Для пользовательских команд
-from decorator import command
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -80,12 +86,7 @@ KILL_BLACK_LIST: list[str] = []
 EVAL_ENABLED = False
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
-
-# -- Пользовательские команды --
-@command(name='chizhik_says',desc='чижик говорит: ...', args=True)
-def chizhik_says(arg):
-    text = ' '.join(arg)
-    print(f"Чижик говорит: {text}")
+USER_COMMANDS_ENABLED = False
 '''
 
 try:
@@ -101,25 +102,20 @@ except ModuleNotFoundError:
             raise SystemExit("Произошла повторная ошибка. Проверьте конфиг")
     else:
         print("Без конфига оболочка не может работать.")
-try:
-    import calc1
-    import pifagor
-except ModuleNotFoundError:
-    pass
 
 ### -- Низкоуровневое логирование --
 DEBUG_MODE = False
 if len(sys.argv) > 1 and sys.argv[1] == 'debug':
     DEBUG_MODE = True
-def log(msg, lvl='INFO') -> None:
+def log(msg:str, lvl:int=0) -> None:
     if not DEBUG_MODE:
         return
     else:
         colors = {
-            'INFO': col.g,
-            'WARNING': col.y,
-            'ERROR': col.r,
-            'CRITICAL': col.r + stl.bd,
+            0: col.g,
+            1: col.y, 
+            2: col.r,
+            3: col.r + stl.bd,
         }
         color = colors.get(lvl, col.w)
         print(f'{color}│ [{lvl}]{rs.all} {msg}')
@@ -150,15 +146,15 @@ try:
     readline.read_history_file(history_file)
     log('succesfully readed history file')
 except FileNotFoundError:
-    log("history file doesn't exist, creating a new one", 'WARNING')
+    log("history file doesn't exist, creating a new one", 1)
     open(history_file, 'w').close()
     readline.read_history_file(history_file)
     log('succesfully readed history file')
 ### -- ??? --
 if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     at = 0
-    log("something gone wrong", "CRITICAL")
-    log('YOU HAD IT COMING', 'CRITICAL')
+    log("something gone wrong", 3)
+    log('YOU HAD IT COMING', 3)
     while at < 10:
         try:
             
@@ -200,14 +196,14 @@ class KillAttemptError(Exception):
 @command(name='kill',desc='убить кого-нибудь',args=True)
 def kill(target:str='Null') -> None:
     if target == 'Null' or not target:
-        log('no args were given', "WARNING")
+        log('no args were given', 1)
         target = input(f'{ilya} Кого хочешь {col.r}{stl.bd}убить? {rs.all}{col.y}')
     else:
         target = ' '.join(target)
     target_ls = target.lower().strip()
     global dead_list
     if any(bad_name in target_ls for bad_name in dont_dare):
-        log("DO NOT", "CRITICAL")
+        log("DO NOT", 3)
         raise KillAttemptError(f"{col.r}{stl.bd}{random.choice([
             'don\'t dare',
             'не смей',
@@ -230,13 +226,13 @@ def kill(target:str='Null') -> None:
         else:
             print(f'{ilya}{col.v}{target} остаётся в живых!{rs.all}')
     else:
-        log("target already in dead_list", "WARNING")
+        log("target already in dead_list", 1)
         print(f'{ilya} как я смогу убить мёртвого?')
 @command(name='revive',desc='возродить кого-нибудь',args=True,aliases=['rebirth','respawn'])
 def revive(target:str='Null') -> None:
     global dead_list
     if target == 'Null' or not target:
-        log("no args were given", "WARNING")
+        log("no args were given", 1)
         target = input(f'{col.r}{stl.bd}???: {col.y}target to revive: {stl.bd}')
     else:
         target = ' '.join(target)
@@ -293,7 +289,7 @@ def whoami() -> None:
 @command(name="guess",desc='игра в "угадай число"',args=True)
 def guess(arg:str='Null'):
     if arg == 'Null' or not arg:
-        log('no args were given', "WARNING")
+        log('no args were given', 1)
         max_num = int(input(f'{ilya} Перед началом, напиши число лимита: '))
     else:
         max_num = int(arg[0])
@@ -403,8 +399,6 @@ def pwd():
     print(os.getcwd())
 @command(name='cd',desc="поменять директорию",args=True)
 def cd(arg:str) -> None:
-    global CURRENT_DIR
-    
     if not arg:
         target = os.path.expanduser('~')
     else:
@@ -423,7 +417,6 @@ def cd(arg:str) -> None:
 def ls(arg:str) -> None:
     path = ' '.join(arg) if arg else '.'
     path = os.path.expanduser(path)
-    
     try:
         items = os.listdir(path)
         for item in sorted(items):
@@ -508,9 +501,19 @@ def rmdir(arg:str) -> None:
         print(f"Нет прав: {folder}")
 @command(name='exit',desc='выйти из оболочки :(',aliases=['quit','break','leave','goodbye'])
 def shell_exit():
-    log('exit because exit command', "WARNING")
+    log('exit because exit command', 1)
     print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
     sys.exit(0)
+
+### -- Импорт кастомных команд --
+if configShell.USER_COMMANDS_ENABLED == True:
+    try:
+        import userCommands
+        log('loaded userCommands.py')
+    except ModuleNotFoundError:
+        log('userCommands.py not found, skipping', 1)
+    except Exception as e:
+        print(f'{col.y}{stl.bd}Ошибка в userCommands.py:{rs.all} {type(e).__name__}: {e}')
 
 ### -- calc1.py и pifagor.py --
 try:
@@ -544,15 +547,15 @@ def StartShell() -> None:
             arg = inp[1:]
             log("input completed")
         except KeyboardInterrupt:
-            log('exit because interupt', "WARNING")
+            log('exit because interupt', 1)
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except EOFError:
-            log('exit because eof', "WARNING")
+            log('exit because eof', 1)
             print(f'{col.r}{stl.bd}Илья: ЗА ЧТО ?!??!?!?!??!?!??!?787:?%?*(?№"*(?(;"291Н87УНЦ378АНУК7П')
             break
         except IndexError:
-            log('IndexError', 'WARNING')
+            log('IndexError', 1)
             continue
         readline.write_history_file(history_file)
         log('write history file')
@@ -567,7 +570,7 @@ def StartShell() -> None:
                 print(configShell.COMMAND_NOT_FOUND)
         except Exception as e:
             if DEBUG_MODE:
-                log("an exception has ocurred", "ERROR")
+                log("an exception has ocurred", 2)
                 traceback.print_exc()
             else:
                 EType = type(e).__name__
