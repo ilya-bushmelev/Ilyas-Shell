@@ -174,7 +174,11 @@ log("commands decorator loaded")
 
 ### -- Генератор списка помощи по командам (просто читает COMMANDS_META) --
 def gen_help() -> str:
+    command_count = 0
+    for _ in COMMANDS_META:
+        command_count += 1
     lines = []
+    count = f"{col.g + stl.bd}Число команд: {command_count}"
     for cmd,meta in COMMANDS_META.items():
         desc = meta.get('desc','без описания')
         aliases = meta.get('aliases',[])
@@ -184,7 +188,8 @@ def gen_help() -> str:
         padding = max(1, 50 - len(pre_result))
         result = pre_result + " " * padding + f"{col.c} - {desc}{rs.all}"
         lines.append(result)
-    return "\n".join(lines)
+    final = "\n".join(lines) + f"\n{count}"
+    return final
    
 
 ### -- Команды --
