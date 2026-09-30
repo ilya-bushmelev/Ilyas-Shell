@@ -83,7 +83,6 @@ PROMPT = f'{col.g}{stl.bd}Ilya\'s{col.c}:Shell{rs.all}'
 DEAD_LIST: list[str] = []
 COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найдена!{rs.all}'
 KILL_BLACK_LIST: list[str] = []
-EVAL_ENABLED = False
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
 USER_COMMANDS_ENABLED = False
@@ -385,15 +384,6 @@ def hex_code(arg:str) -> None:
         print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
-@command(name='eval',desc="опасная команда для вызова eval()", args=True)
-def ebal(arg:str) -> None:
-    if not arg:
-        print("ты аргументы забыл")
-        return
-    if configShell.EVAL_ENABLED == True and arg[0] == '--i-know-what-i-am-doing':
-        eval(' '.join(arg[1:]))
-    else:
-        print(f'{stl.bd + col.r}Данное действие запрещено. Проверьте флаг --i-know-what-i-am-doing и переменную EVAL_ENABLED в конфиге{rs.all}')
 @command(name='time',desc="вывод текущего времени и даты",aliases=["date",'timedate','datetime'])
 def timedate():
     now = datetime.now()
