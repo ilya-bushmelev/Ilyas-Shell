@@ -509,6 +509,7 @@ if configShell.USER_COMMANDS_ENABLED == True:
     except ModuleNotFoundError:
         log('userCommands.py not found, skipping', 1)
     except Exception as e:
+        log(f"{type(e).__name__} occured while trying to import userCommands.py", 2)
         print(f'{col.y}{stl.bd}Ошибка в userCommands.py:{rs.all} {type(e).__name__}: {e}')
 
 ### -- calc1.py и pifagor.py --
@@ -523,7 +524,8 @@ try:
         @command(name='pif',desc="простой решатель теоремы пифагора", aliases=['pifagor'])
         def startpif():
             pifagor.pifagorpy()
-except (AttributeError, ImportError):
+except (AttributeError, ImportError) as e:
+    log(f"{type(e).__name__} occured while trying to import addons", 2)
     print("При импорте некоторых дополнений возникла ошибка.")
 
 ###  -- Основной цикл --
