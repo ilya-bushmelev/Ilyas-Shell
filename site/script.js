@@ -1,5 +1,5 @@
 const ilya = document.getElementById('ilya!')
-ilya.addEventListener('dblclick', function() {
+ilya.addEventListener('click', function() {
     let originalText = ilya.textContent
     this.textContent = "Это я!"
     setTimeout(() => {
@@ -7,7 +7,7 @@ ilya.addEventListener('dblclick', function() {
     }, 2000)
 })
 const ilya_bushmelev = document.getElementById('ilya-bushmelev')
-ilya_bushmelev.addEventListener('dblclick', function() {
+ilya_bushmelev.addEventListener('click', function() {
     let originalText = this.textContent
     this.textContent = "Мой ник на GitHub!"
     setTimeout(() => {
@@ -15,7 +15,7 @@ ilya_bushmelev.addEventListener('dblclick', function() {
     },2000)
 })
 const chizhik = document.getElementById('footer-chizhik')
-chizhik.addEventListener('dblclick', function() {
+chizhik.addEventListener('click', function() {
     let originalText = chizhik.textContent
     console.log('%cЧижик: "Я люблю семечки!"', 'color:#0f0; font-size: 16px;')
     this.textContent = "Кря! Где мои семечки?";
@@ -24,7 +24,7 @@ chizhik.addEventListener('dblclick', function() {
     }, 2000)
 })
 const pyzhulya = document.getElementById('footer-pyzhulya');
-pyzhulya.addEventListener('dblclick', function() {
+pyzhulya.addEventListener('click', function() {
     let originalText = pyzhulya.textContent
     this.textContent = 'я особенная.';
     console.log('%cПыжуля: "ты нашёл меня? или ты изучаешь сайт?"', 'color:#dd0; font-size: 16px;')

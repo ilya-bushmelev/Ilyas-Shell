@@ -8,19 +8,19 @@
 #           |   ### ---------------------------- ###  |
 #           \ --------------------------------------- /
 
-#   Приветствую в коде оболочки! Код полностью читаемый и понятный.
-#   Задумка была чтобы быть улучшенной версией ilya's:cmd_, которая работает через модули.
-#   Кстати, посмотри configShell.py там находится конфиг оболочки! 
-#   Пожалуйста, не удаляй его. Без него оболочка не будет работать.
-#   Оболочка поддерживает пользовательские команды, создавай их в userCommands.py,
-#   гайд по настройке кастомных команд есть в README.md.
+# *  Приветствую в коде оболочки! Код полностью читаемый и понятный.
+# *  Задумка была чтобы быть улучшенной версией ilya's:cmd_, которая работает через модули.
+# *  Кстати, посмотри configShell.py там находится конфиг оболочки! 
+# *  Пожалуйста, не удаляй его. Без него оболочка не будет работать.
+# *  Оболочка поддерживает пользовательские команды, создавай их в userCommands.py,
+# *  гайд по настройке кастомных команд есть в README.md.
 
 #   Ссылки проекта:
 #     GitHub Репозиторий: https://github.com/ilya-bushmelev/Ilyas-Shell
 #     Сайт (GitHub Pages): https://ilya-bushmelev.github.io/Ilyas-Shell
 #     Автор проекта: https://github.com/ilya-bushmelev
 #
-#   С юбилейной 600-й строкой? 
+# ?  С юбилейной 600-й строкой? 
 
 ### -- Импорты --
 import os
@@ -117,7 +117,14 @@ def log(msg:str, lvl:int=0) -> None:
             2: col.r,
             3: col.r + stl.bd,
         }
-        color = colors.get(lvl, col.w)
+        lvl_names = {
+            0:"INFO",
+            1:"WARN",
+            2:"ERROR",
+            3:"CRITCICAL"
+        }
+        color = colors.get(raw_lvl, col.w)
+        lvl = lvl_names.get(lvl, "UNKNOWN")
         print(f'{color}│ [{lvl}]{rs.all} {msg}')
 
 ### -- Переменные --
@@ -150,7 +157,7 @@ except FileNotFoundError:
     open(history_file, 'w').close()
     readline.read_history_file(history_file)
     log('succesfully readed history file')
-### -- ??? --
+###? -- ??? --
 if any(YOU_HAD_IT_COMING in dont_dare for YOU_HAD_IT_COMING in dead_list):
     at = 0
     log("something gone wrong", 3)
