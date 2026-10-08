@@ -20,7 +20,7 @@
 #     Сайт (GitHub Pages): https://ilya-bushmelev.github.io/Ilyas-Shell
 #     Автор проекта: https://github.com/ilya-bushmelev
 #
-# ?  С юбилейной 600-й строкой? 
+# *  С юбилейной 600-й строкой! 
 
 ### -- Импорты --
 import os
@@ -35,7 +35,7 @@ from typing import Callable
 from decorator import command, COMMANDS, COMMANDSWARGS, COMMANDS_META
 
 ### -- Импорт конфига --
-CFG_TEMPLATE = r'''
+CFG_TEMPLATE = r"""
 class col:
     r = '\033[91m'  # красный
     g = '\033[92m'  # зелёный
@@ -86,8 +86,7 @@ KILL_BLACK_LIST: list[str] = []
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
 USER_COMMANDS_ENABLED = False
-USER_COMMANDS_ENABLED = False
-'''
+"""
 
 try:
     import configShell
@@ -108,6 +107,19 @@ DEBUG_MODE = False
 if len(sys.argv) > 1 and sys.argv[1] == 'debug':
     DEBUG_MODE = True
 def log(msg:str, lvl:int=0) -> None:
+    """Логирует (почти) все действия с оболочкой.
+    
+    Имеет четыре уровня:
+    :[INFO] - инфа всякая
+    :[WARN] - предупреждение о чём-либо
+    :[ERROR] - ошибка, ой-ёй!
+    :[CRITICAL] - самый сок
+
+    :param msg: сообщение 
+    :type msg: str
+    :param lvl: уровень
+    :type lvl: int
+    :return: None"""
     if not DEBUG_MODE:
         return
     else:
@@ -121,9 +133,9 @@ def log(msg:str, lvl:int=0) -> None:
             0:"INFO",
             1:"WARN",
             2:"ERROR",
-            3:"CRITCICAL"
+            3:"CRITICAL"
         }
-        color = colors.get(raw_lvl, col.w)
+        color = colors.get(lvl, col.w)
         lvl = lvl_names.get(lvl, "UNKNOWN")
         print(f'{color}│ [{lvl}]{rs.all} {msg}')
 
@@ -180,9 +192,21 @@ log("commands decorator loaded")
 
 ### -- Генератор списка помощи по командам (просто читает COMMANDS_META) --
 def gen_help() -> str:
-    command_count = 0
-    for _ in COMMANDS_META:
-        command_count += 1
+    """**Генерирует и форматирует команды из `COMMANDS_META`**
+    
+    Как он это делает:
+    - Определяет размер `COMMANDS_META`
+    - Цикл для всех элементов словаря которые в нём:
+        - Определяет описание команды, алиасы, наличие аргументов и т.д.
+        - Собирает название с цветом `col.g + stl.bd` (зелёный + жирный), добавляет алиасы через слэш (/)
+        - Добавляет текст ` <аргументы> ` если имеются аргументы у команды
+        - Определяется отступ: 50 - (длина текста команды)
+        - Все это склеивается в `result` и отправляется в `lines`
+    - После завершения цикла функция возвращает строку с итоговым результатом
+    
+    :return: отформатированный текст
+    :rtype: str"""
+    command_count = len(COMMANDS_META)
     lines = []
     count = f"{col.g + stl.bd}Число команд: {command_count}"
     for cmd,meta in COMMANDS_META.items():
@@ -391,6 +415,7 @@ def hex_code(arg:str) -> None:
         print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
+#@command(name="encrypt", desc="шифрует текст в двоичные числа")
 @command(name='time',desc="вывод текущего времени и даты",aliases=["date",'timedate','datetime'])
 def timedate():
     now = datetime.now()
