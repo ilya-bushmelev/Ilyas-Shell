@@ -47,4 +47,4 @@ COMMAND_NOT_FOUND = f'{col.r}{stl.bd}Илья: Команда не найден�
 KILL_BLACK_LIST: list[str] = []
 INCLUDE_CALC1 = False
 INCLUDE_PIFAGOR = False
-USER_COMMANDS_ENABLED = False
+USER_COMMANDS_ENABLED = True

@@ -415,7 +415,25 @@ def hex_code(arg:str) -> None:
         print(f'{ilya} Результат: {hex_result}')
     except (ValueError, IndexError):
         print(f'{ilya} error')
-#@command(name="encrypt", desc="шифрует текст в двоичные числа")
+@command(name="encrypt", desc="шифрует текст в двоичные числа",args=True)
+def encrypt(arg: str) -> None:
+    if not arg:
+        print(f"{ilya} Синтаксис: encrypt <текст>")
+        return
+    text = ' '.join(arg)
+    binary_result = ' '.join(format(ord(char), '08b') for char in text)
+    print(f"{ilya} Результат: {binary_result}")
+@command(name="decrypt", desc="расшифровывает двоичные числа в текст",args=True)
+def decrypt(arg: str) -> None:
+    if not arg:
+        print(f"{ilya} Синтаксис: decrypt <двоичные числа>")
+        return
+    binary_input = ' '.join(arg)
+    try:
+        text_result = ''.join(chr(int(b, 2)) for b in binary_input.split())
+        print(f"{ilya} Результат: {text_result}")
+    except ValueError:
+        print(f"{ilya} Ошибка: убедитесь, что ввод содержит только корректные двоичные числа.")
 @command(name='time',desc="вывод текущего времени и даты",aliases=["date",'timedate','datetime'])
 def timedate():
     now = datetime.now()
