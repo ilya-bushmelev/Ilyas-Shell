@@ -110,16 +110,17 @@ def log(msg:str, lvl:int=0) -> None:
     """Логирует (почти) все действия с оболочкой.
     
     Имеет четыре уровня:
-    :[INFO] - инфа всякая
-    :[WARN] - предупреждение о чём-либо
-    :[ERROR] - ошибка, ой-ёй!
-    :[CRITICAL] - самый сок
+    - [INFO] - инфа всякая
+    - [WARN] - предупреждение о чём-либо
+    - [ERROR] - ошибка, ой-ёй!
+    - [CRITICAL] - самый сок
 
     :param msg: сообщение 
     :type msg: str
     :param lvl: уровень
     :type lvl: int
-    :return: None"""
+    :return: None
+    :rtype: None"""
     if not DEBUG_MODE:
         return
     else:
@@ -577,9 +578,75 @@ try:
 except (AttributeError, ImportError) as e:
     log(f"{type(e).__name__} occured while trying to import addons", 2)
     print("При импорте некоторых дополнений возникла ошибка.")
+@command(name='hangman', desc='виселица: угадай слово по буквам', args=False)
+def hangman():
+    import random
+    import time
+
+    words = ['python', 'арч', 'чижик', 'пыжуля', 'терминал', 'декоратор',
+             'оболочка', 'гитхаб', 'клавиатура', 'монитор', 'кофе', 'код']
+    word = random.choice(words)
+    guessed = ['_'] * len(word)
+    tries = 6
+    used = []
+
+    print("🎮 Игра: ВИСЕЛИЦА")
+    print(f"Слово из {len(word)} букв. У тебя {tries} попыток.")
+    print("Пиши по одной букве. 'выход' — сдаться.\n")
+
+    while tries > 0 and '_' in guessed:
+        print('  ' + ' '.join(guessed))
+        letter = input("Буква: ").lower().strip()
+
+        if letter == 'выход':
+            print(f"Сдался. Слово было: {word}")
+            return
+
+        if len(letter) != 1 or not letter.isalpha():
+            print("Одна буква, пожалуйста.")
+            continue
+
+        if letter in used:
+            print(f"'{letter}' уже была!")
+            continue
+
+        used.append(letter)
+
+        if letter in word:
+            for i, ch in enumerate(word):
+                if ch == letter:
+                    guessed[i] = ch
+            print(f"✅ Есть! '{letter}' в слове.")
+            time.sleep(0.5)
+        else:
+            tries -= 1
+            print(f"❌ Нет. Осталось попыток: {tries}")
+            time.sleep(0.5)
+
+    print()
+    if '_' not in guessed:
+        print(f"🎉 Победа! Слово: {word}")
+    else:
+        print(f"💀 Проиграл. Слово было: {word}")
+        time.sleep(1)
+        print("Илья: ну ты и лох 🙂")
 
 ###  -- Основной цикл --
 def StartShell() -> None: 
+    """**Запускает интерактивную оболочку командной строки.**
+
+    Функция выводит приветствие при старте, отображает текущую рабочую
+    директорию в приглашении и бесконечно ждёт ввод пользователя. После
+    получения команды она разбивает ввод на имя команды и аргументы,
+    выполняет соответствующую функцию из зарегистрированного набора команд
+    и продолжает цикл до завершения работы оболочки.
+
+    Обработка ошибок ввода включает завершение по Ctrl+C и EOF, после чего
+    оболочка корректно завершает работу без падения.
+
+    :return: None
+    :rtype: None
+    """
     # приветствие при запуске StartShell()
     print(f'{stl.bd}Добро пожаловать в оболочку {col.g}{stl.bd}💚 Ilya\'s{col.c}:Shell 🐚,{col.w}')
     print(f'улучшенную версию {col.g}{stl.bd}ilya\'s{col.v}:{col.c}cmd_{col.w} написаную на {col.y}Python 3.14!{rs.all}')
